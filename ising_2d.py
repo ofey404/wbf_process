@@ -1,3 +1,7 @@
+"""参考链接：
+https://blog.csdn.net/tortelee/article/details/79646049
+"""
+
 import random
 import matplotlib.pyplot as plt
 import numpy as np
@@ -125,5 +129,5 @@ def getWeightValue(numsOfSample,sizeOfSample,temperature):
             s = np.row_stack((s,reshaped))
     return s
 #运行getweightValue函数，中间已经把结果会成图了
-res = getWeightValue(1,40,2)
+res = getWeightValue(5,40,2)
 #print(len(res))
