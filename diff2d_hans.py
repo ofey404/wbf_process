@@ -1,5 +1,8 @@
 import numpy as np
 import scipy.linalg
+import matplotlib.pylab as plt
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
 
 def solver_dense(
     I, a, f, Lx, Ly, Nx, Ny, dt, T, theta=0.5, user_action=None):
@@ -111,6 +114,32 @@ def solver_dense(
 
     return u_n
 
+def plot_img(u, Nx, Ny):
+    x = np.linspace(0, 1, Nx)
+    y = np.linspace(0, 1, Ny)
+    x, y = np.meshgrid(x, y)
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    surf = ax.plot_surface(x, y, u, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+    plt.show()    
 
 
+def test_I(x, y):
+    if y == 0:
+        return x*(1000-x)
+    else:
+        return 0
 
+def test_f(x, y, t):
+    return 0
+
+def main():
+    Nx, Ny = 10, 10
+    u_f = solver_dense(test_I, 1, test_f, 1000, 1000, Nx, Ny, 0.1, 1)
+    plot_img(u_f, Nx+1, Ny+1)
+    print("over")
+
+if __name__ == "__main__":
+    main()
