@@ -2,7 +2,10 @@ from numpy import linspace, zeros
 
 L = 100
 T = 100
-N = 100
+Nx = 100
+Nt = 100
+a = 10
+I(x) = 0
 
 x = linspace(0, L, Nx+1)    # mesh points in space
 dx = x[1] - x[0]
