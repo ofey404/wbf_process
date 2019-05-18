@@ -32,3 +32,16 @@ $$
 
 有N个点就有N-2个方程. 求解联立方程. 隐式欧拉方法更加全面, 它在每个时间点求解耦合方程.
 
+一维联立方程的迭代是不断左乘一个稀疏矩阵.
+
+### Sparse matrix implementation
+
+scipy.sparse包可以解稀疏矩阵的问题.
+
+### Crank-Nicolson scheme
+
+$$
+u_{i}^{n+1}-\frac{1}{2} F\left(u_{i-1}^{n+1}-2 u_{i}^{n+1}+u_{i+1}^{n+1}\right)=u_{i}^{n}+\frac{1}{2} F\left(u_{i-1}^{n}-2 u_{i}^{n}+u_{i+1}^{n}\right)
+$$
+
+又一种算法.
