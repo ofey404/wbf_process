@@ -4,9 +4,10 @@ import matplotlib.pylab as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 
+
 def solver_dense(
-    I, a, f, Lx, Ly, Nx, Ny, dt, T, theta=0.5, user_action=None):
-    
+        I, a, f, Lx, Ly, Nx, Ny, dt, T, theta=0.5, user_action=None):
+
     x = np.linspace(0, Lx, Nx+1)
     y = np.linspace(0, Ly, Ny+1)
 
@@ -40,7 +41,7 @@ def solver_dense(
     b = np.zeros(N)
 
     # 这是什么意思?
-    m = lambda i, j: j*(Nx+1) + i
+    def m(i, j): return j*(Nx+1) + i
 
     j = 0
     for i in Ix:
@@ -68,8 +69,7 @@ def solver_dense(
         p = m(i, j)
         A[p, p] = 1
 
-
-    ## 利用A迭代.
+    # 利用A迭代.
 
     for n in It[0:-1]:
         # 计算b
@@ -86,12 +86,12 @@ def solver_dense(
             for i in Ix[1:-1]:
                 p = m(i, j)
                 b[p] = u_n[i, j] + \
-                (1-theta) * (
-                    Fx*(u_n[i+1, j] - 2*u_n[i, j] + u_n[i-1, j]) +\
+                    (1-theta) * (
+                    Fx*(u_n[i+1, j] - 2*u_n[i, j] + u_n[i-1, j]) +
                     Fy*(u_n[i, j+1] - 2*u_n[i, j] + u_n[i, j-1])
                 ) + \
-                theta*dt*f(i*dx, j*dy, (n+1)*dt) + \
-                (1 - theta)*dt*f(i*dx, j*dy, n*dt)
+                    theta*dt*f(i*dx, j*dy, (n+1)*dt) + \
+                    (1 - theta)*dt*f(i*dx, j*dy, n*dt)
             # 边界
             i = Nx
             p = m(i, j)
@@ -108,11 +108,11 @@ def solver_dense(
         for i in Ix:
             for j in Iy:
                 u[i, j] = c[m(i, j)]
-                
 
         u_n, u = u, u_n
 
     return u_n
+
 
 def plot_img(u, Nx, Ny):
     x = np.linspace(0, 1, Nx)
@@ -121,9 +121,10 @@ def plot_img(u, Nx, Ny):
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    surf = ax.plot_surface(x, y, u, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    surf = ax.plot_surface(x, y, u, rstride=1, cstride=1,
+                           cmap=cm.coolwarm, linewidth=0, antialiased=False)
     fig.colorbar(surf, shrink=0.5, aspect=5)
-    plt.show()    
+    plt.show()
 
 
 def test_I(x, y):
@@ -132,14 +133,17 @@ def test_I(x, y):
     else:
         return 0
 
+
 def test_f(x, y, t):
     return 0
+
 
 def main():
     Nx, Ny = 10, 10
     u_f = solver_dense(test_I, 1, test_f, 1000, 1000, Nx, Ny, 0.1, 1)
     plot_img(u_f, Nx+1, Ny+1)
     print("over")
+
 
 if __name__ == "__main__":
     main()
