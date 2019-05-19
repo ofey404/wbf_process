@@ -130,3 +130,6 @@ key.json
 !.gitkeep
 *.nb
 archive/
+playground/
+
+external/*
