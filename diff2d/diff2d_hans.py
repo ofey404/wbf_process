@@ -129,7 +129,7 @@ def plot_img(u, Nx, Ny):
 
 def test_I(x, y):
     if y == 0:
-        return x*(1000-x)
+        return x*(1-x)
     else:
         return 0
 
@@ -140,7 +140,7 @@ def test_f(x, y, t):
 
 def main():
     Nx, Ny = 10, 10
-    u_f = solver_dense(test_I, 1, test_f, 1000, 1000, Nx, Ny, 0.1, 1)
+    u_f = solver_dense(test_I, 1, test_f, 1, 1, Nx, Ny, 0.5, 1)
     plot_img(u_f, Nx+1, Ny+1)
     print("over")
 
