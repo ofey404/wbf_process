@@ -132,4 +132,4 @@ key.json
 archive/
 playground/
 
-external/*
+/*/external/*
