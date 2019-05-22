@@ -4,7 +4,11 @@ import matplotlib.gridspec as gridspec
 
 
 class Kelvin_Helmholtz(object):
-    """"""
+    """some important attibutes:
+      self.dt: 一个step模拟的时间
+      self.vx: x方向的速度场
+      self.vy: y方向的速度场
+    """
 
     def __init__(self,
                  N=(128, 128),
