@@ -17,7 +17,7 @@ def example_of_kelvin_helmholtz():
     print("print vy")
     print(K.vy)
     input("接下来使用演示功能. 输入回车继续")
-    K.display
+    K.display()
 
 def main():
     example_of_kelvin_helmholtz()
