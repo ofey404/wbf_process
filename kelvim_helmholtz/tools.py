@@ -61,11 +61,6 @@ class Kelvin_Helmholtz(object):
         self.P = (self.Energy/self.vol - 0.5*self.rho *
                   (self.vx**2+self.vy**2)) * (self.gamma-1)
 
-        # get time step (CFL)
-        dt = self.courant_fac * \
-            np.min(np.min([self.dx, self.dy]) /
-                   (np.sqrt(self.gamma*self.P/self.rho) + np.sqrt(self.vx**2+self.vy**2)))
-
         # calculate gradients
         rho_gradx = (np.roll(self.rho, R, axis=0) -
                      np.roll(self.rho, L, axis=0)) / (2.*self.dx)
@@ -120,7 +115,7 @@ class Kelvin_Helmholtz(object):
                 1., (-(self.P-np.roll(self.P, R, axis=1))/self.dy) / (P_grady + 1.0e-8*(P_grady == 0)))) * P_grady
 
         # extrapolate to cell faces (in time & space)
-        rho_prime = self.rho - 0.5*dt * \
+        rho_prime = self.rho - 0.5*self.dt * \
             (self.vx * rho_gradx + self.rho * vx_gradx +
                 self.vy * rho_grady + self.rho * vy_grady)
         rho_XL = rho_prime - rho_gradx * self.dx/2.
@@ -129,23 +124,23 @@ class Kelvin_Helmholtz(object):
         rho_YL = rho_prime - rho_grady * self.dy/2.
         rho_YL = np.roll(rho_YL, R, axis=1)
         rho_YR = rho_prime + rho_grady * self.dy/2.
-        vx_prime = self.vx - 0.5*dt * (self.vx * vx_gradx + self.vy *
-                                       vx_grady + (1/self.rho) * P_gradx)
+        vx_prime = self.vx - 0.5*self.dt * (self.vx * vx_gradx + self.vy *
+                                            vx_grady + (1/self.rho) * P_gradx)
         vx_XL = vx_prime - vx_gradx * self.dx/2.
         vx_XL = np.roll(vx_XL, R, axis=0)
         vx_XR = vx_prime + vx_gradx * self.dx/2.
         vx_YL = vx_prime - vx_grady * self.dy/2.
         vx_YL = np.roll(vx_YL, R, axis=1)
         vx_YR = vx_prime + vx_grady * self.dy/2.
-        vy_prime = self.vy - 0.5*dt * (self.vx * vy_gradx + self.vy *
-                                       vy_grady + (1/self.rho) * P_grady)
+        vy_prime = self.vy - 0.5*self.dt * (self.vx * vy_gradx + self.vy *
+                                            vy_grady + (1/self.rho) * P_grady)
         vy_XL = vy_prime - vy_gradx * self.dx/2.
         vy_XL = np.roll(vy_XL, R, axis=0)
         vy_XR = vy_prime + vy_gradx * self.dx/2.
         vy_YL = vy_prime - vy_grady * self.dy/2.
         vy_YL = np.roll(vy_YL, R, axis=1)
         vy_YR = vy_prime + vy_grady * self.dy/2.
-        P_prime = self.P - 0.5*dt * \
+        P_prime = self.P - 0.5*self.dt * \
             (self.gamma*self.P * (vx_gradx + vy_grady) +
                 self.vx * P_gradx + self.vy * P_grady)
         P_XL = P_prime - P_gradx * self.dx/2.
@@ -203,23 +198,29 @@ class Kelvin_Helmholtz(object):
             vx_YL**2+vy_YL**2) - (P_YR/(self.gamma-1)+0.5*rho_YR * (vx_YR**2+vy_YR**2)))
 
         # update solution
-        self.Mass = self.Mass - dt * self.dy * flux_rho_X
-        self.Mass = self.Mass + dt * self.dy * np.roll(flux_rho_X, L, axis=0)
-        self.Mass = self.Mass - dt * self.dx * flux_rho_Y
-        self.Mass = self.Mass + dt * self.dx * np.roll(flux_rho_Y, L, axis=1)
-        self.Momx = self.Momx - dt * self.dy * flux_momx_X
-        self.Momx = self.Momx + dt * self.dy * np.roll(flux_momx_X, L, axis=0)
-        self.Momx = self.Momx - dt * self.dx * flux_momx_Y
-        self.Momx = self.Momx + dt * self.dx * np.roll(flux_momx_Y, L, axis=1)
-        self.Momy = self.Momy - dt * self.dy * flux_momy_X
-        self.Momy = self.Momy + dt * self.dy * np.roll(flux_momy_X, L, axis=0)
-        self.Momy = self.Momy - dt * self.dx * flux_momy_Y
-        self.Momy = self.Momy + dt * self.dx * np.roll(flux_momy_Y, L, axis=1)
-        self.Energy = self.Energy - dt * self.dy * flux_en_X
-        self.Energy = self.Energy + dt * \
+        self.Mass = self.Mass - self.dt * self.dy * flux_rho_X
+        self.Mass = self.Mass + self.dt * self.dy * \
+            np.roll(flux_rho_X, L, axis=0)
+        self.Mass = self.Mass - self.dt * self.dx * flux_rho_Y
+        self.Mass = self.Mass + self.dt * self.dx * \
+            np.roll(flux_rho_Y, L, axis=1)
+        self.Momx = self.Momx - self.dt * self.dy * flux_momx_X
+        self.Momx = self.Momx + self.dt * self.dy * \
+            np.roll(flux_momx_X, L, axis=0)
+        self.Momx = self.Momx - self.dt * self.dx * flux_momx_Y
+        self.Momx = self.Momx + self.dt * self.dx * \
+            np.roll(flux_momx_Y, L, axis=1)
+        self.Momy = self.Momy - self.dt * self.dy * flux_momy_X
+        self.Momy = self.Momy + self.dt * self.dy * \
+            np.roll(flux_momy_X, L, axis=0)
+        self.Momy = self.Momy - self.dt * self.dx * flux_momy_Y
+        self.Momy = self.Momy + self.dt * self.dx * \
+            np.roll(flux_momy_Y, L, axis=1)
+        self.Energy = self.Energy - self.dt * self.dy * flux_en_X
+        self.Energy = self.Energy + self.dt * \
             self.dy * np.roll(flux_en_X, L, axis=0)
-        self.Energy = self.Energy - dt * self.dx * flux_en_Y
-        self.Energy = self.Energy + dt * \
+        self.Energy = self.Energy - self.dt * self.dx * flux_en_Y
+        self.Energy = self.Energy + self.dt * \
             self.dx * np.roll(flux_en_Y, L, axis=1)
 
     def display(self,
@@ -329,7 +330,7 @@ class Kelvin_Helmholtz(object):
             rho_YL = np.roll(rho_YL, R, axis=1)
             rho_YR = rho_prime + rho_grady * self.dy/2.
             vx_prime = self.vx - 0.5*self.dt * (self.vx * vx_gradx + self.vy *
-                                           vx_grady + (1/self.rho) * P_gradx)
+                                                vx_grady + (1/self.rho) * P_gradx)
             vx_XL = vx_prime - vx_gradx * self.dx/2.
             vx_XL = np.roll(vx_XL, R, axis=0)
             vx_XR = vx_prime + vx_gradx * self.dx/2.
@@ -337,7 +338,7 @@ class Kelvin_Helmholtz(object):
             vx_YL = np.roll(vx_YL, R, axis=1)
             vx_YR = vx_prime + vx_grady * self.dy/2.
             vy_prime = self.vy - 0.5*self.dt * (self.vx * vy_gradx + self.vy *
-                                           vy_grady + (1/self.rho) * P_grady)
+                                                vy_grady + (1/self.rho) * P_grady)
             vy_XL = vy_prime - vy_gradx * self.dx/2.
             vy_XL = np.roll(vy_XL, R, axis=0)
             vy_XR = vy_prime + vy_gradx * self.dx/2.
@@ -443,6 +444,8 @@ class Kelvin_Helmholtz(object):
 def main():
     K = Kelvin_Helmholtz()
     K.display()
+    # while True:
+    #     K.step()
 
 
 if __name__ == "__main__":
